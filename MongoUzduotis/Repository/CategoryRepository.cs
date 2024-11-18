@@ -2,6 +2,7 @@
 using MongoDB.Driver;
 using MongoUzduotis.Contracts;
 using MongoUzduotis.Models;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace MongoUzduotis.Repository
 
         public CategoryRepository(IMongoClient mongoClient)
         {
-            var database = mongoClient.GetDatabase("yourDatabaseName");
+            var database = mongoClient.GetDatabase("kategorijudb");
             _categories = database.GetCollection<Category>("categories");
         }
 
@@ -25,7 +26,10 @@ namespace MongoUzduotis.Repository
 
         public async Task DeleteAsync(ObjectId id)
         {
-            await _categories.DeleteOneAsync(c => c.Id == id);
+            var deleteResult = await _categories.DeleteOneAsync(c => c.Id == id);
+            if (deleteResult.DeletedCount < 1)
+                throw new Exception("Element was not found");
+
         }
 
         public async Task<List<Category>> GetAllAsync()
@@ -41,6 +45,7 @@ namespace MongoUzduotis.Repository
         public async Task UpdateAsync(Category category)
         {
             await _categories.ReplaceOneAsync(c => c.Id == category.Id, category);
+            Log.Information("Category Entity Updated successfully");
         }
     }
 }

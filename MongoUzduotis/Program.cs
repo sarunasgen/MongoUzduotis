@@ -1,6 +1,7 @@
 ﻿using MongoDB.Driver;
 using MongoUzduotis.Contracts;
 using MongoUzduotis.Repository;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+var log = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("logs/myapp.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+Log.Logger = log;
+Log.Information("Application Started");
 
 app.UseHttpsRedirection();
 
